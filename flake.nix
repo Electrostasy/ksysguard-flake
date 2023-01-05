@@ -18,7 +18,7 @@
     overlays.default = final: prev: {
       ksysguard = prev.ksysguard.overrideAttrs (old: {
         postInstall = ''
-          ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/bin/ksysguard"
+          ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
         '';
       });
     };
