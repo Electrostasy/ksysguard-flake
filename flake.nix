@@ -48,7 +48,7 @@
 
           afterInstallScript = prev.writeText "after-install.sh" ''
             #!/usr/bin/env bash
-            /usr/bin/env setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
+            /usr/bin/env setcap "cap_net_raw+ep" "${ksysguard-wrapped}/libexec/ksysguard/.ksgrd_network_helper-wrapped"
           '';
 
           customControl = prev.writeText "custom-control.txt" ''
