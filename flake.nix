@@ -46,8 +46,9 @@
                 ln -s ${program} $out/bin/.
               '';
 
-          afterInstallScript = prev.writeShellScript "after-install.sh" ''
-            ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
+          afterInstallScript = prev.writeText "after-install.sh" ''
+            #!/usr/bin/env bash
+            /usr/bin/env setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
           '';
 
           customControl = prev.writeText "custom-control.txt" ''
