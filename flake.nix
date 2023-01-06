@@ -16,8 +16,12 @@
         lib.fix self.overlays.default nixpkgs.legacyPackages.${system});
 
     overlays.default = final: prev: {
+      # For convenience
+      inherit (prev.plasma5Packages) libksysguard;
+
       ksysguard = prev.ksysguard.overrideAttrs (old: {
         postFixup = ''
+          mv $out/bin/ksysguard $out/bin/ksysguard-standalone
           ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
         '';
       });
