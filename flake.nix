@@ -37,24 +37,36 @@
             '';
           });
 
-          # Create a bundle as with github:NixOS/bundlers#toDEB.
-          bundle = nix-utils.bundlers.deb {
-            inherit (prev) system;
-            program = ksysguard-wrapped.outPath;
-          };
-        in
-          # Add a post installation script for the *.deb package, to be run
-          # when installed by dpkg or apt.
-          bundle.overrideAttrs (old: {
-            postInstall =
-              let
-                debPostInstall = prev.writeShellScript "after-install.sh" ''
-                  ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
-                '';
-              in ''
-                ${prev.fpm}/bin/fpm -s deb -t deb --name ksysguard-standalone --after-install ${debPostInstall} "$out/*.deb"
+          toPackage = program:
+            let
+              inherit (builtins.parseDrvName (builtins.elemAt (builtins.split "/[0-9a-df-np-sv-z]{32}-" program.outPath) 2)) name;
+            in
+              prev.runCommand name { } ''
+                mkdir -p $out/bin
+                ln -s ${program} $out/bin/.
               '';
-          });
+
+          afterInstallScript = prev.writeShellScript "after-install.sh" ''
+            ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
+          '';
+
+          customControl = prev.writeText "custom-control.txt" ''
+            Package: ksysguard-standalone
+            Version: 1.0
+            License: unknown
+            Vendor: none
+            Architecture: amd64
+            Maintainer: <@localhost>
+            Installed-Size: 0
+            Section: default
+            Priority: extra
+            Homepage: http://example.com/no-uri-given
+            Description: no description given
+          '';
+        in
+          (prev.callPackage ./bundle-deb.nix { inherit nix-utils; })
+            (toPackage ksysguard-wrapped)
+            "--deb-custom-control ${customControl} --after-install ${afterInstallScript}";
     };
   };
 }
