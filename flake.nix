@@ -36,7 +36,7 @@
             postInstall =
               let
                 debPostInstall = prev.writeShellScript "after-install.sh" ''
-                  ${prev.libcap}/bin/set/cap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
+                  ${prev.libcap}/bin/setcap "cap_net_raw+ep" "$out/libexec/ksysguard/.ksgrd_network_helper-wrapped"
                 '';
               in ''
                 ${prev.fpm}/bin/fpm -s deb -t dev --name ksysguard-standalone --after-install ${debPostInstall} "$out/*.deb"
